@@ -32,3 +32,4 @@ Most accurate, but slower
 Unzip into  folder
  - tar xvzf [filename]
  
+Edit the RobotAI configuration to use camera as the motion detection mechanism.
