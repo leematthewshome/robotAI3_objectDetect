@@ -5,6 +5,7 @@
 import numpy as np
 import tensorflow as tf
 import csv
+import os
 
 class detectorAPI:
     def __init__(self, ENVIRON, path_to_ckpt):
@@ -32,6 +33,7 @@ class detectorAPI:
         self.detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
         self.num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
 
+
     def processFrame(self, image):
         # Expand dimensions since the trained_model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(image, axis=0)
@@ -47,32 +49,35 @@ class detectorAPI:
                         int(boxes[0,i,1]*im_width),
                         int(boxes[0,i,2] * im_height),
                         int(boxes[0,i,3]*im_width))
-
         return boxes_list, scores[0].tolist(), [int(x) for x in classes[0].tolist()], int(num[0])
+
 
     def close(self):
         self.sess.close()
         self.default_graph.close()
-        
-        
+
+
     #function to count each type of object (returns dict of class & count)
     def objectCount(self, image):
         #load 2017 mapping of class ID to name from CSV file
-        csv_path = = os.path.join(self.TOPDIR, "client/objectDetect/classes.csv")
+        csv_path = os.path.join(self.TOPDIR, "client/objectDetect/classes.csv")
         with open(csv_path, mode='r') as infile:
             reader = csv.reader(infile)
             classmap = {rows[0]:rows[3] for rows in reader}
         threshold = 0.5
         dictObjects = {}
+        className = ''
         #actual detection of objects
         boxes, scores, classes, num = processFrame(image)
         for i in range(len(boxes)):
+            className = classmap[str(classes[i])]
             if scores[i] > threshold:
-                #add object to list of objects detected
-                classmap[str(classes[i])]
-                
+                #check if there is already an entry in dictionary
+                if className in dictObjects:
+                    dictObjects[className] = dictObjects[className] + 1
+                else:
+                    dictObjects[className] = 1
         return dictObjects
-
 
 
 
