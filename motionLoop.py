@@ -325,7 +325,7 @@ class motionLoop(object):
             firstFrame = gray
             # dilate the thresholded image to fill in holes, then find contours on thresholded image
             thresh = cv2.dilate(thresh, None, iterations=2)
-            (image, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
             # loop over the contours
             for c in cnts:
@@ -333,7 +333,7 @@ class motionLoop(object):
                 if cv2.contourArea(c) < self.min_area:
                     continue
                 #motion detected, see if a human was detected by TernsorFlow
-                iPerson = detector.personCount(image)
+                iPerson = detector.personCount(frame)
                 #see if we need to trigger a new Alert for the motion
                 if iPerson > 0:
                     lastAlert = self.detectionEvent(lastAlert, camera)
