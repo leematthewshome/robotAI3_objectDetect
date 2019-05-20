@@ -125,6 +125,11 @@ class motionLoop(object):
         self.logger.debug("Starting Motion Sensor Loop")
         # pre-fetch the security chat text 
         self.createFile()
+
+        # zzzz hard code settings to allow testing
+        self.ENVIRON["motion"] = True
+        self.detector = 'Camera'
+
         while True:
             self.logger.debug("ENVIRON for Motion and Security : %s and %s" % (self.ENVIRON["motion"], self.ENVIRON["security"]))
             if self.ENVIRON["motion"]:
@@ -285,8 +290,8 @@ class motionLoop(object):
     def detectWithCam(self):
         self.logger.debug("Starting to detect Motion")
         #variables for TensorFlow human detection    
-        model_path = = os.path.join(self.TOPDIR, "client/objectDetect/frozen_inference_graph.pb")
-        detector = DetectorAPI(self.ENVIRON, path_to_ckpt=model_path)
+        model_path = os.path.join(self.TOPDIR, "client/objectDetect/ssd_mobilenet_v1_coco_2017_11_17/frozen_inference_graph.pb")
+        detector = detectorAPI(self.ENVIRON, path_to_ckpt=model_path)
 
         # define feed from camera
         camera = cv2.VideoCapture(0)
@@ -295,7 +300,7 @@ class motionLoop(object):
         firstFrame = None
         lastAlert = datetime.datetime.today()
         frames = 0
-        
+
         # loop over the frames of the video feed and detect motion
         while True:
             # if we are busy processing a job then skip motion until we are done
@@ -332,10 +337,10 @@ class motionLoop(object):
                 # if the contour is too small, ignore it
                 if cv2.contourArea(c) < self.min_area:
                     continue
-                #motion detected, see if a human was detected by TernsorFlow
-                iPerson = detector.personCount(frame)
-                #see if we need to trigger a new Alert for the motion
-                if iPerson > 0:
+                #motion detected, see if a person was detected by objectDetect
+                #------------------------------------------------------------
+                objDict = detector.objectCount(frame)
+                if 'person' in objDict:
                     lastAlert = self.detectionEvent(lastAlert, camera)
 
             # check the ENVIRON when frame count reaches check point
