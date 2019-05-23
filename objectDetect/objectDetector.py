@@ -68,7 +68,7 @@ class detectorAPI:
         dictObjects = {}
         className = ''
         #actual detection of objects
-        boxes, scores, classes, num = processFrame(image)
+        boxes, scores, classes, num = self.processFrame(image)
         for i in range(len(boxes)):
             className = classmap[str(classes[i])]
             if scores[i] > threshold:
